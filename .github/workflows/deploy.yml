@@ -113,28 +113,24 @@ jobs:
             **/storage/framework/sessions/**
             **/storage/framework/views/**
 
-      - name: Upload .env file
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT }}
-          protocol: ftps
-          local-dir: ./backend/
-          server-dir: ${{ secrets.FTP_BACKEND_DIR }}
-          dangerous-clean-slate: false
-          exclude: |
-            **/*
-            !.env
+      - name: Upload only .env file via FTP
+        run: |
+          apt-get update && apt-get install -y ncftp
+
+          export NCFTPPASS="${{ secrets.FTP_PASSWORD }}"
+          ncftpput -R -v -u "${{ secrets.FTP_USERNAME }}" \
+            -P "${{ secrets.FTP_PORT }}" \
+            "${{ secrets.FTP_SERVER }}" \
+            "${{ secrets.FTP_BACKEND_DIR }}" \
+            ./backend/.env
 
       - name: Trigger deployment script
         run: |
-          DEPLOY_KEY="${{ secrets.DEPLOY_SECRET_KEY }}"
-          DEPLOY_URL="${{ secrets.DEPLOY_URL }}"
+          DEPLOY_KEY="${{ secrets.DEPLOY_SECRET_KEY || '' }}"
+          DEPLOY_URL="${{ secrets.DEPLOY_URL || '' }}"
           if [ -z "$DEPLOY_URL" ] || [ -z "$DEPLOY_KEY" ]; then
             echo "⚠️  Skipping auto-deployment. Set DEPLOY_URL and DEPLOY_SECRET_KEY secrets to enable."
           else
             echo "📦 Triggering composer install on server..."
-            curl -s "${DEPLOY_URL}?key=${DEPLOY_KEY}" | jq .
+            curl -s "${DEPLOY_URL}?key=${DEPLOY_KEY}" | jq . || echo "Response received"
           fi

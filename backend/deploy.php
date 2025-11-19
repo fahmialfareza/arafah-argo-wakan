@@ -34,28 +34,49 @@ try {
 
   $output[] = "Found composer.json";
 
-  // Run composer install - try multiple common paths
+  // Try to find composer executable
   $composer_paths = [
     '/usr/local/bin/composer',
     '/usr/bin/composer',
     '/opt/cpanel/ea-php82/root/usr/bin/composer',
     'composer',
-    php_sapi_name() === 'cli' ? shell_exec('which composer') : null
   ];
 
   $composer_cmd = null;
   foreach ($composer_paths as $path) {
-    if ($path && file_exists(trim($path))) {
-      $composer_cmd = trim($path);
+    if (file_exists($path)) {
+      $composer_cmd = $path;
       break;
     }
   }
 
+  // If composer not found, try to download composer.phar
   if (!$composer_cmd) {
-    throw new Exception('Composer not found. Common paths checked: ' . implode(', ', array_filter($composer_paths)));
+    $output[] = "Composer executable not found in PATH. Attempting to download composer.phar...";
+
+    if (!file_exists('composer.phar')) {
+      $output[] = "Downloading composer.phar from https://getcomposer.org/composer.phar";
+      $composer_phar = file_get_contents('https://getcomposer.org/composer.phar');
+
+      if ($composer_phar === false) {
+        throw new Exception('Failed to download composer.phar. Check internet connectivity on server.');
+      }
+
+      if (file_put_contents('composer.phar', $composer_phar) === false) {
+        throw new Exception('Failed to save composer.phar to disk.');
+      }
+
+      chmod('composer.phar', 0755);
+      $output[] = "✓ composer.phar downloaded successfully";
+    } else {
+      $output[] = "Using existing composer.phar";
+    }
+
+    $php_binary = PHP_BINARY ?: 'php';
+    $composer_cmd = "$php_binary composer.phar";
   }
 
-  $output[] = "Found composer at: $composer_cmd";
+  $output[] = "Using composer: $composer_cmd";
   $output[] = "Running: $composer_cmd install --no-dev --optimize-autoloader";
   $result = shell_exec("$composer_cmd install --no-dev --optimize-autoloader 2>&1");
 
