@@ -80,7 +80,7 @@ jobs:
         with:
           php-version: "8.1"
           tools: composer
-          extensions: mbstring, pdo, pdo_mysql, tokenizer, openssl
+          extensions: mbstring, xml, dom, curl, fileinfo, openssl, pdo, pdo_mysql, tokenizer, json, ctype, bcmath, zip
 
       - name: Generate .env from secret
         working-directory: ./backend
