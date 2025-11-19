@@ -75,7 +75,15 @@ try {
     // Use CLI-safe PHP binary with ini override
     $php_cli = 'php';
     $output[] = "Using CLI PHP: $php_cli";
-    $cmd = "$php_cli -d register_argc_argv=Off -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader 2>&1";
+
+    // Set COMPOSER_HOME to temp directory
+    $composer_home = sys_get_temp_dir() . '/.composer';
+    if (!is_dir($composer_home)) {
+      mkdir($composer_home, 0755, true);
+    }
+
+    $output[] = "Setting COMPOSER_HOME to: $composer_home";
+    $cmd = "COMPOSER_HOME=$composer_home $php_cli -d register_argc_argv=Off -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader 2>&1";
   } else {
     $output[] = "Found composer executable: $composer_cmd";
     $cmd = "$composer_cmd install --no-dev --optimize-autoloader 2>&1";
