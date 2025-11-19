@@ -34,12 +34,33 @@ try {
 
   $output[] = "Found composer.json";
 
-  // Run composer install
-  $output[] = "Running: composer install --no-dev --optimize-autoloader";
-  $result = shell_exec('composer install --no-dev --optimize-autoloader 2>&1');
+  // Run composer install - try multiple common paths
+  $composer_paths = [
+    '/usr/local/bin/composer',
+    '/usr/bin/composer',
+    '/opt/cpanel/ea-php82/root/usr/bin/composer',
+    'composer',
+    php_sapi_name() === 'cli' ? shell_exec('which composer') : null
+  ];
+
+  $composer_cmd = null;
+  foreach ($composer_paths as $path) {
+    if ($path && file_exists(trim($path))) {
+      $composer_cmd = trim($path);
+      break;
+    }
+  }
+
+  if (!$composer_cmd) {
+    throw new Exception('Composer not found. Common paths checked: ' . implode(', ', array_filter($composer_paths)));
+  }
+
+  $output[] = "Found composer at: $composer_cmd";
+  $output[] = "Running: $composer_cmd install --no-dev --optimize-autoloader";
+  $result = shell_exec("$composer_cmd install --no-dev --optimize-autoloader 2>&1");
 
   if ($result === null) {
-    throw new Exception('Failed to execute composer install. Make sure composer is installed on the server.');
+    throw new Exception('Failed to execute composer install.');
   }
 
   $output[] = $result;
