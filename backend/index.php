@@ -14,7 +14,31 @@
 |
 */
 
-$app = require __DIR__ . '/bootstrap/app.php';
+// Enable error reporting for debugging
+if (!defined('LARAVEL_START')) {
+  define('LARAVEL_START', microtime(true));
+}
+
+// Display errors during loading
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+
+// Log errors to file
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/storage/logs/php-errors.log');
+
+try {
+  $app = require __DIR__ . '/bootstrap/app.php';
+} catch (\Exception $e) {
+  http_response_code(500);
+  header('Content-Type: application/json');
+  die(json_encode([
+    'error' => 'Application bootstrap failed',
+    'message' => $e->getMessage(),
+    'file' => $e->getFile(),
+    'line' => $e->getLine(),
+  ]));
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +52,14 @@ $app = require __DIR__ . '/bootstrap/app.php';
 |
 */
 
-$app->run();
+try {
+  $app->run();
+} catch (\Exception $e) {
+  http_response_code(500);
+  header('Content-Type: application/json');
+  die(json_encode([
+    'error' => 'Application execution failed',
+    'message' => $e->getMessage(),
+  ]));
+}
+
