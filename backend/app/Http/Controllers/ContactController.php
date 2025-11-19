@@ -52,8 +52,8 @@ class ContactController extends Controller
         'products' => $products,
       ])->render();
 
-      // Send email to business
-      Mail::raw($html, function ($message) use ($name) {
+      // Send HTML email to business
+      Mail::html($html, function ($message) use ($name) {
         $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
           ->to(env('MAIL_TO_ADDRESS'))
           ->subject('New Inquiry from ' . $name);
