@@ -34,7 +34,7 @@ try {
 
   $output[] = "Found composer.json";
 
-  // Try to find composer executable
+  // Try to find composer executable (skip lsphp)
   $composer_paths = [
     '/usr/local/bin/composer',
     '/usr/bin/composer',
@@ -44,15 +44,15 @@ try {
 
   $composer_cmd = null;
   foreach ($composer_paths as $path) {
-    if (file_exists($path)) {
+    if (file_exists($path) && strpos($path, 'lsphp') === false) {
       $composer_cmd = $path;
       break;
     }
   }
 
-  // If composer not found, try to download composer.phar
+  // If composer not found, download composer.phar and use with proper CLI PHP
   if (!$composer_cmd) {
-    $output[] = "Composer executable not found in PATH. Attempting to download composer.phar...";
+    $output[] = "Composer executable not found. Attempting to download composer.phar...";
 
     if (!file_exists('composer.phar')) {
       $output[] = "Downloading composer.phar from https://getcomposer.org/composer.phar";
@@ -72,22 +72,16 @@ try {
       $output[] = "Using existing composer.phar";
     }
 
-    $php_binary = PHP_BINARY ?: 'php';
-    $composer_cmd = "$php_binary composer.phar";
+    // Use CLI-safe PHP binary with ini override
+    $php_cli = 'php';
+    $output[] = "Using CLI PHP: $php_cli";
+    $cmd = "$php_cli -d register_argc_argv=Off -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader 2>&1";
+  } else {
+    $output[] = "Found composer executable: $composer_cmd";
+    $cmd = "$composer_cmd install --no-dev --optimize-autoloader 2>&1";
   }
 
-  $output[] = "Using composer: $composer_cmd";
-  $output[] = "Running: $composer_cmd install --no-dev --optimize-autoloader";
-
-  // Try with -d register_argc_argv=Off flag to bypass LiteSpeed PHP restrictions
-  $cmd = "$composer_cmd install --no-dev --optimize-autoloader 2>&1";
-
-  // If using php binary, add the ini setting
-  if (strpos($composer_cmd, 'php') !== false || strpos($composer_cmd, 'lsphp') !== false) {
-    $cmd = "$composer_cmd -d register_argc_argv=Off install --no-dev --optimize-autoloader 2>&1";
-    $output[] = "Running with register_argc_argv=Off flag...";
-  }
-
+  $output[] = "Executing: $cmd";
   $result = shell_exec($cmd);
 
   if ($result === null) {
