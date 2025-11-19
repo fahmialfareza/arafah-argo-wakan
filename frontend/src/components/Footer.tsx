@@ -7,9 +7,11 @@ export default function Footer() {
         <div className="col-span-1 md:col-span-2">
           <Link
             to="/"
-            className="text-2xl font-bold text-white mb-4 block tracking-wide hover:text-green-400 transition"
+            className="text-2xl font-bold mb-4 tracking-wide hover:text-yellow-300 transition flex items-center"
+            style={{ color: "#E9D53D" }}
           >
-            <i className="fas fa-leaf mr-2 text-green-500"></i>ARAFAH
+            <img src="/logo.png" alt="ARAFAH Logo" className="w-8 h-8 mr-2" />
+            ARAFAH
           </Link>
           <p className="mb-6 pr-8">
             Your reliable partner for sourcing premium Indonesian commodities.
@@ -38,7 +40,7 @@ export default function Footer() {
                 to="/export-products"
                 className="hover:text-white transition"
               >
-                Products Exports
+                Export Products
               </Link>
             </li>
             <li>
@@ -46,7 +48,7 @@ export default function Footer() {
                 to="/import-products"
                 className="hover:text-white transition"
               >
-                Products Imports
+                Import Products
               </Link>
             </li>
             <li>

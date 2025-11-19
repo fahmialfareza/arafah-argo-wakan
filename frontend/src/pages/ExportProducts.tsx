@@ -135,7 +135,7 @@ export default function ExportProducts() {
         <section id="other" className="mb-20 pt-10 border-t border-gray-200">
           <div className="flex items-center mb-8">
             <div className="bg-green-600 p-3 rounded-full mr-4">
-              <i className="fas fa-leaf text-white text-2xl"></i>
+              <img src="/logo.png" alt="Logo" className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-3xl font-bold text-gray-900">

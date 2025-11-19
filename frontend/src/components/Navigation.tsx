@@ -22,9 +22,11 @@ export default function Navigation() {
           {/* Logo */}
           <Link
             to="/"
-            className="text-2xl font-bold text-green-800 tracking-wide hover:text-green-900 transition"
+            className="text-2xl font-bold tracking-wide hover:text-yellow-700 transition flex items-center"
+            style={{ color: "#8B6914" }}
           >
-            <i className="fas fa-leaf mr-2"></i>ARAFAH
+            <img src="/logo.png" alt="ARAFAH Logo" className="w-8 h-8 mr-2" />
+            ARAFAH
           </Link>
 
           {/* Desktop Menu */}
@@ -33,9 +35,14 @@ export default function Navigation() {
               to="/"
               className={`px-1 pt-1 transition ${
                 isActive("/")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
               Home
             </Link>
@@ -43,9 +50,14 @@ export default function Navigation() {
               to="/about"
               className={`px-1 pt-1 transition ${
                 isActive("/about")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/about")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
               About Us
             </Link>
@@ -53,29 +65,44 @@ export default function Navigation() {
               to="/export-products"
               className={`px-1 pt-1 transition ${
                 isActive("/export-products")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/export-products")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
-              Products Exports
+              Export Products
             </Link>
             <Link
               to="/import-products"
               className={`px-1 pt-1 transition ${
                 isActive("/import-products")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/import-products")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
-              Products Imports
+              Import Products
             </Link>
             <Link
               to="/facility"
               className={`px-1 pt-1 transition ${
                 isActive("/facility")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/facility")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
               Facility
             </Link>
@@ -83,9 +110,14 @@ export default function Navigation() {
               to="/contact"
               className={`px-1 pt-1 transition ${
                 isActive("/contact")
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
+                  ? "border-b-2 transition"
+                  : "text-gray-600 hover:transition"
               }`}
+              style={
+                isActive("/contact")
+                  ? { color: "#8B6914", borderBottomColor: "#8B6914" }
+                  : { color: "inherit" }
+              }
             >
               Contact Us
             </Link>
@@ -126,9 +158,14 @@ export default function Navigation() {
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
                 Home
               </Link>
@@ -137,9 +174,14 @@ export default function Navigation() {
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/about")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/about")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
                 About Us
               </Link>
@@ -148,31 +190,46 @@ export default function Navigation() {
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/export-products")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/export-products")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
-                Products Exports
+                Export Products
               </Link>
               <Link
                 to="/import-products"
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/import-products")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/import-products")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
-                Products Imports
+                Import Products
               </Link>
               <Link
                 to="/facility"
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/facility")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/facility")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
                 Facility
               </Link>
@@ -181,9 +238,14 @@ export default function Navigation() {
                 onClick={closeMobileMenu}
                 className={`block px-3 py-2 rounded-md text-base font-medium transition ${
                   isActive("/contact")
-                    ? "bg-green-50 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-green-700"
+                    ? "text-white rounded-md font-medium transition"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
+                style={
+                  isActive("/contact")
+                    ? { backgroundColor: "#8B6914", color: "#ffffff" }
+                    : {}
+                }
               >
                 Contact Us
               </Link>

@@ -27,6 +27,11 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: ./frontend/pnpm-lock.yaml
 
+      - name: Generate .env from secret
+        working-directory: ./frontend
+        run: |
+          echo "${{ secrets.FRONTEND_ENV }}" > .env
+
       - name: Install dependencies (pnpm)
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
