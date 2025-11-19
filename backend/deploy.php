@@ -78,7 +78,17 @@ try {
 
   $output[] = "Using composer: $composer_cmd";
   $output[] = "Running: $composer_cmd install --no-dev --optimize-autoloader";
-  $result = shell_exec("$composer_cmd install --no-dev --optimize-autoloader 2>&1");
+
+  // Try with -d register_argc_argv=Off flag to bypass LiteSpeed PHP restrictions
+  $cmd = "$composer_cmd install --no-dev --optimize-autoloader 2>&1";
+
+  // If using php binary, add the ini setting
+  if (strpos($composer_cmd, 'php') !== false || strpos($composer_cmd, 'lsphp') !== false) {
+    $cmd = "$composer_cmd -d register_argc_argv=Off install --no-dev --optimize-autoloader 2>&1";
+    $output[] = "Running with register_argc_argv=Off flag...";
+  }
+
+  $result = shell_exec($cmd);
 
   if ($result === null) {
     throw new Exception('Failed to execute composer install.');
