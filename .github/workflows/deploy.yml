@@ -91,6 +91,12 @@ jobs:
         working-directory: ./backend
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
+      - name: Create vendor.zip
+        working-directory: ./backend
+        run: |
+          zip -r vendor.zip vendor -q
+          echo "✓ vendor.zip created ($(du -h vendor.zip | cut -f1))"
+
       - name: Deploy backend via FTP (excluding vendor)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -113,6 +119,21 @@ jobs:
             **/storage/framework/sessions/**
             **/storage/framework/views/**
 
+      - name: Upload vendor.zip
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftps
+          local-dir: ./backend/
+          server-dir: ${{ secrets.FTP_BACKEND_DIR }}
+          dangerous-clean-slate: false
+          exclude: |
+            **/*
+            !vendor.zip
+
       - name: Upload .env file
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -128,13 +149,12 @@ jobs:
             **/*
             !.env
 
-      - name: Trigger deployment script
+      - name: Deployment Complete
         run: |
-          DEPLOY_KEY="${{ secrets.DEPLOY_SECRET_KEY || '' }}"
-          DEPLOY_URL="${{ secrets.DEPLOY_URL || '' }}"
-          if [ -z "$DEPLOY_URL" ] || [ -z "$DEPLOY_KEY" ]; then
-            echo "⚠️  Skipping auto-deployment. Set DEPLOY_URL and DEPLOY_SECRET_KEY secrets to enable."
-          else
-            echo "📦 Triggering composer install on server..."
-            curl -s "${DEPLOY_URL}?key=${DEPLOY_KEY}" | jq . || echo "Response received"
-          fi
+          echo "✅ Backend deployment complete!"
+          echo ""
+          echo "📝 Next Steps in cPanel:"
+          echo "1. Go to File Manager"
+          echo "2. Navigate to your backend directory"
+          echo "3. Right-click on vendor.zip and select 'Extract'"
+          echo "4. Delete vendor.zip after extraction"
