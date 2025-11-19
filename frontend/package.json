@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tanstack/react-query": "^5.51.0",
     "@tanstack/react-router": "^1.136.8",
+    "@tailwindcss/postcss": "^4.1.17",
     "autoprefixer": "^10.4.22",
     "nprogress": "^0.2.0",
     "postcss": "^8.5.6",

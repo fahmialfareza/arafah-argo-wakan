@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { useSubmitContactForm } from "../hooks/useSubmitContactForm";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,9 @@ export default function Contact() {
     message: "",
     products: [] as string[],
   });
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const submitMutation = useSubmitContactForm();
 
   const products = [
     "Coffee Beans",
@@ -26,6 +30,14 @@ export default function Contact() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleProductChange = (product: string) => {
@@ -35,13 +47,54 @@ export default function Contact() {
         ? prev.products.filter((p) => p !== product)
         : [...prev.products, product],
     }));
+    // Clear products error when user selects a product
+    if (formErrors["products"]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors["products"];
+        return newErrors;
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
-    alert("Thank you for your inquiry! We will contact you soon.");
+    setFormErrors({});
+
+    // Validate locally
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors["name"] = "Name is required";
+    if (!formData.company.trim()) errors["company"] = "Company is required";
+    if (!formData.email.trim()) errors["email"] = "Email is required";
+    if (!formData.message.trim()) errors["message"] = "Message is required";
+    if (formData.products.length === 0)
+      errors["products"] = "Please select at least one product";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    // Submit form
+    submitMutation.mutate(formData, {
+      onSuccess: () => {
+        // Reset form
+        setFormData({
+          name: "",
+          company: "",
+          email: "",
+          phone: "",
+          message: "",
+          products: [],
+        });
+        setFormErrors({});
+      },
+      onError: (error) => {
+        setFormErrors({
+          submit: error.message || "Failed to submit inquiry",
+        });
+      },
+    });
   };
 
   return (
@@ -78,6 +131,30 @@ export default function Contact() {
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
                 Send Us an Inquiry
               </h2>
+
+              {/* Success Message */}
+              {submitMutation.isSuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium">
+                    ✓ {submitMutation.data?.message}
+                  </p>
+                  {submitMutation.data?.data?.reference_id && (
+                    <p className="text-green-700 text-sm mt-2">
+                      Reference ID: {submitMutation.data.data.reference_id}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Error Messages */}
+              {formErrors.submit && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 font-medium">
+                    ✗ {formErrors.submit}
+                  </p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -90,9 +167,19 @@ export default function Contact() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                      className={`w-full px-4 py-3 rounded-md border shadow-sm focus:ring-green-500 focus:border-green-500 ${
+                        formErrors.name
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="John Doe"
+                      disabled={submitMutation.isPending}
                     />
+                    {formErrors.name && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {formErrors.name}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -104,9 +191,19 @@ export default function Contact() {
                       required
                       value={formData.company}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                      className={`w-full px-4 py-3 rounded-md border shadow-sm focus:ring-green-500 focus:border-green-500 ${
+                        formErrors.company
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="Global Trading Ltd."
+                      disabled={submitMutation.isPending}
                     />
+                    {formErrors.company && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {formErrors.company}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -121,9 +218,19 @@ export default function Contact() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                      className={`w-full px-4 py-3 rounded-md border shadow-sm focus:ring-green-500 focus:border-green-500 ${
+                        formErrors.email
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300"
+                      }`}
                       placeholder="john@company.com"
+                      disabled={submitMutation.isPending}
                     />
+                    {formErrors.email && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {formErrors.email}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -136,6 +243,7 @@ export default function Contact() {
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                       placeholder="+1 234 567 890"
+                      disabled={submitMutation.isPending}
                     />
                   </div>
                 </div>
@@ -155,11 +263,17 @@ export default function Contact() {
                           checked={formData.products.includes(product)}
                           onChange={() => handleProductChange(product)}
                           className="h-5 w-5 text-green-600 rounded focus:ring-green-500"
+                          disabled={submitMutation.isPending}
                         />
                         <span className="ml-2 text-gray-700">{product}</span>
                       </label>
                     ))}
                   </div>
+                  {formErrors.products && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {formErrors.products}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -172,16 +286,44 @@ export default function Contact() {
                     required
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className={`w-full px-4 py-3 rounded-md border shadow-sm focus:ring-green-500 focus:border-green-500 ${
+                      formErrors.message
+                        ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Please specify grade, estimated volume (e.g., 1x20ft container), and destination port..."
+                    disabled={submitMutation.isPending}
                   ></textarea>
+                  {formErrors.message && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {formErrors.message}
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full md:w-auto bg-green-700 hover:bg-green-800 text-white px-8 py-4 rounded-md font-bold text-lg transition duration-300 shadow-md"
+                  disabled={
+                    submitMutation.isPending || submitMutation.isSuccess
+                  }
+                  className={`w-full md:w-auto px-8 py-4 rounded-md font-bold text-lg transition duration-300 shadow-md text-white ${
+                    submitMutation.isPending
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : submitMutation.isSuccess
+                      ? "bg-green-600 cursor-default"
+                      : "bg-green-700 hover:bg-green-800"
+                  }`}
                 >
-                  Send Inquiry Now
+                  {submitMutation.isPending ? (
+                    <>
+                      <span className="inline-block animate-spin mr-2">⟳</span>
+                      Sending...
+                    </>
+                  ) : submitMutation.isSuccess ? (
+                    <>✓ Sent Successfully</>
+                  ) : (
+                    <>Send Inquiry Now</>
+                  )}
                 </button>
                 <p className="text-sm text-gray-500 mt-4 text-center md:text-left">
                   <i className="fas fa-lock mr-1"></i> Your information is
