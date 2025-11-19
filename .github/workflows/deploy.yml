@@ -90,6 +90,7 @@ jobs:
           exclude: |
             **/.git*
             **/.github*
+            **/vendor/**
             **/node_modules/**
             **/tests/**
             **/storage/logs/**
