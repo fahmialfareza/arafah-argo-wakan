@@ -83,10 +83,13 @@ try {
     }
 
     $output[] = "Setting COMPOSER_HOME to: $composer_home";
-    $cmd = "COMPOSER_HOME=$composer_home $php_cli -d register_argc_argv=Off -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader 2>&1";
+    putenv("COMPOSER_HOME=$composer_home");
+    putenv("COMPOSER_ALLOW_SUPERUSER=1");
+
+    $cmd = "$php_cli -d register_argc_argv=Off -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction 2>&1";
   } else {
     $output[] = "Found composer executable: $composer_cmd";
-    $cmd = "$composer_cmd install --no-dev --optimize-autoloader 2>&1";
+    $cmd = "$composer_cmd install --no-dev --optimize-autoloader --no-interaction 2>&1";
   }
 
   $output[] = "Executing: $cmd";
