@@ -267,6 +267,13 @@ async function buildSSG() {
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   
+  # Don't rewrite /assets/ directory
+  RewriteCond %{REQUEST_URI} !^/assets/
+  
+  # Don't rewrite /sitemap.xml or /robots.txt
+  RewriteCond %{REQUEST_URI} !^/sitemap\\.xml$
+  RewriteCond %{REQUEST_URI} !^/robots\\.txt$
+  
   # Serve /route/index.html for /route requests
   RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1/index.html [L]
   
