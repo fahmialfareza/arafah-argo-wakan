@@ -126,10 +126,12 @@ function generatePage(route, metadata) {
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Vite App Scripts and Styles -->
+    <script type="module" crossorigin src="/assets/index.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index.css">
   </head>
   <body class="font-poppins">
     <div id="root"></div>
-    <script type="module" src="/main.tsx"></script>
   </body>
 </html>`;
 
@@ -261,12 +263,55 @@ async function buildSSG() {
   RewriteEngine On
   RewriteBase /
   
-  # Don't rewrite files or directories
+  # Don't rewrite actual files or directories
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   
-  # Rewrite to index.html for routes
-  RewriteRule ^(.*)$ index.html [L]
+  # Serve /route/index.html for /route requests
+  RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1/index.html [L]
+  
+  # Root request gets index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^$ index.html [L]
+</IfModule>
+
+# Add proper MIME types for fonts and assets
+<IfModule mod_mime.c>
+  AddType application/x-font-ttf ttf
+  AddType application/x-font-otf otf
+  AddType application/x-font-woff woff
+  AddType application/x-font-woff2 woff2
+  AddEncoding gzip .gz
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+  Header set Referrer-Policy "no-referrer-when-downgrade"
+</IfModule>
+
+# Caching rules
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 week"
+  ExpiresByType application/javascript "access plus 1 week"
+  ExpiresByType application/x-javascript "access plus 1 week"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType application/x-font-ttf "access plus 1 month"
+  ExpiresByType application/x-font-woff "access plus 1 month"
+  ExpiresByType application/x-font-woff2 "access plus 1 month"
+</IfModule>
+
+# Gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/javascript application/xml application/xhtml+xml application/rss+xml application/javascript application/x-javascript image/svg+xml
 </IfModule>
 `;
     await fs.writeFile(path.join(SSG_DIST_DIR, ".htaccess"), htaccess);

@@ -2,19 +2,17 @@
   RewriteEngine On
   RewriteBase /
   
-  # Remove .html extension
+  # Don't rewrite actual files or directories
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^([^\.]+)$ $1.html [NC,L]
   
-  # Redirect /index.html to /
-  RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html\ HTTP/
-  RewriteRule ^index\.html$ / [R=301,L]
+  # Serve /route/index.html for /route requests
+  RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1/index.html [L]
   
-  # Handle SPA routing - serve index.html for all routes
+  # Root request gets index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^ index.html [L]
+  RewriteRule ^$ index.html [L]
   
   # Add security headers
   Header set X-Content-Type-Options "nosniff"
