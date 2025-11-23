@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Services\UseplunkService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class SendContactEmailJob extends Job implements ShouldQueue
@@ -60,74 +60,33 @@ class SendContactEmailJob extends Job implements ShouldQueue
     public function handle()
     {
         try {
-            // Check if SMTP is configured
-            if (!env('MAIL_HOST') || !env('MAIL_USERNAME')) {
-                throw new \Exception('SMTP configuration is missing. Please check MAIL_HOST and MAIL_USERNAME.');
+            // Check if Useplunk API key is configured
+            if (!env('USEPLUNK_API_KEY')) {
+                throw new \Exception('USEPLUNK_API_KEY is not configured in .env file');
             }
 
-            // Build HTML email
-            $html = view('emails.contact-form', [
-                'name' => $this->emailData['name'],
-                'company' => $this->emailData['company'],
-                'email' => $this->emailData['email'],
-                'phone' => $this->emailData['phone'],
-                'message' => $this->emailData['message'],
-                'products' => $this->emailData['products'],
-            ])->render();
+            // Use Useplunk API service to send email
+            $useplunk = new UseplunkService();
+            $result = $useplunk->sendContactFormEmail($this->emailData);
 
-            // Send HTML email to business
-            Mail::html($html, function ($message) {
-                $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
-                    ->to(env('MAIL_TO_ADDRESS'))
-                    ->replyTo($this->emailData['email'], $this->emailData['name'])
-                    ->subject('New Inquiry from ' . $this->emailData['name']);
-            });
-
-            Log::info('Contact email sent successfully', [
+            Log::info('Contact email sent successfully via Useplunk API', [
                 'name' => $this->emailData['name'],
                 'email' => $this->emailData['email'],
                 'attempt' => $this->attempts(),
+                'response' => $result,
             ]);
 
-        } catch (\Symfony\Component\Mailer\Exception\TransportException $e) {
-            // Handle SMTP-specific errors
-            Log::error('SMTP connection error in contact email', [
+        } catch (\Exception $e) {
+            Log::error('Contact email sending failed via Useplunk API', [
                 'error' => $e->getMessage(),
                 'attempt' => $this->attempts(),
                 'max_tries' => $this->tries,
-                'smtp_host' => env('MAIL_HOST'),
-                'smtp_port' => env('MAIL_PORT'),
             ]);
 
-            // Re-throw to trigger retry with exponential backoff
+            // Re-throw the exception to trigger retry with exponential backoff
             if ($this->attempts() < $this->tries) {
                 $this->release($this->retryAfter * $this->attempts());
                 return;
-            }
-
-            // Log final failure
-            Log::critical('Contact email failed after all retries - SMTP connection issue', [
-                'data' => $this->emailData,
-                'error' => $e->getMessage(),
-                'smtp_config' => [
-                    'host' => env('MAIL_HOST'),
-                    'port' => env('MAIL_PORT'),
-                    'encryption' => env('MAIL_ENCRYPTION'),
-                ]
-            ]);
-
-            throw $e;
-
-        } catch (\Exception $e) {
-            Log::error('Contact email sending failed', [
-                'error' => $e->getMessage(),
-                'attempt' => $this->attempts(),
-                'max_tries' => $this->tries,
-            ]);
-
-            // Re-throw the exception to trigger retry
-            if ($this->attempts() < $this->tries) {
-                throw $e;
             }
 
             // After all retries failed, log final failure
