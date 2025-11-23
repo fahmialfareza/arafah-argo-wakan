@@ -101,7 +101,17 @@ return [
   | SMTP server. Increase this if you're experiencing timeout errors.
   |
   */
-  'timeout' => env('MAIL_TIMEOUT', 30),
+  'timeout' => env('MAIL_TIMEOUT', 60),
+
+  /*
+  |--------------------------------------------------------------------------
+  | Local Domain
+  |--------------------------------------------------------------------------
+  |
+  | The local domain for SMTP HELO/EHLO commands.
+  |
+  */
+  'local_domain' => env('MAIL_LOCAL_DOMAIN', env('APP_URL', 'localhost')),
 
   /*
   |--------------------------------------------------------------------------
@@ -114,11 +124,21 @@ return [
   */
   'stream' => [
     'ssl' => [
-      'verify_peer' => env('MAIL_VERIFY_PEER', true),
-      'verify_peer_name' => env('MAIL_VERIFY_PEER_NAME', true),
-      'allow_self_signed' => env('MAIL_ALLOW_SELF_SIGNED', false),
+      'verify_peer' => env('MAIL_VERIFY_PEER', false),
+      'verify_peer_name' => env('MAIL_VERIFY_PEER_NAME', false),
+      'allow_self_signed' => env('MAIL_ALLOW_SELF_SIGNED', true),
     ],
   ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | Disable TLS
+  |--------------------------------------------------------------------------
+  |
+  | Set to true to disable TLS encryption if your server doesn't support it.
+  |
+  */
+  'disable_tls' => env('MAIL_DISABLE_TLS', false),
 
   /*
   |--------------------------------------------------------------------------

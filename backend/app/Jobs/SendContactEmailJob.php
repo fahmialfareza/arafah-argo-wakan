@@ -18,14 +18,21 @@ class SendContactEmailJob extends Job implements ShouldQueue
      *
      * @var int
      */
-    public $tries = 3;
+    public $tries = 5;
 
     /**
      * The number of seconds to wait before retrying the job.
      *
      * @var int
      */
-    public $retryAfter = 60;
+    public $retryAfter = 90;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 120;
 
     /**
      * The data for the email
@@ -53,6 +60,11 @@ class SendContactEmailJob extends Job implements ShouldQueue
     public function handle()
     {
         try {
+            // Check if SMTP is configured
+            if (!env('MAIL_HOST') || !env('MAIL_USERNAME')) {
+                throw new \Exception('SMTP configuration is missing. Please check MAIL_HOST and MAIL_USERNAME.');
+            }
+
             // Build HTML email
             $html = view('emails.contact-form', [
                 'name' => $this->emailData['name'],
@@ -67,6 +79,7 @@ class SendContactEmailJob extends Job implements ShouldQueue
             Mail::html($html, function ($message) {
                 $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
                     ->to(env('MAIL_TO_ADDRESS'))
+                    ->replyTo($this->emailData['email'], $this->emailData['name'])
                     ->subject('New Inquiry from ' . $this->emailData['name']);
             });
 
@@ -75,6 +88,35 @@ class SendContactEmailJob extends Job implements ShouldQueue
                 'email' => $this->emailData['email'],
                 'attempt' => $this->attempts(),
             ]);
+
+        } catch (\Symfony\Component\Mailer\Exception\TransportException $e) {
+            // Handle SMTP-specific errors
+            Log::error('SMTP connection error in contact email', [
+                'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
+                'max_tries' => $this->tries,
+                'smtp_host' => env('MAIL_HOST'),
+                'smtp_port' => env('MAIL_PORT'),
+            ]);
+
+            // Re-throw to trigger retry with exponential backoff
+            if ($this->attempts() < $this->tries) {
+                $this->release($this->retryAfter * $this->attempts());
+                return;
+            }
+
+            // Log final failure
+            Log::critical('Contact email failed after all retries - SMTP connection issue', [
+                'data' => $this->emailData,
+                'error' => $e->getMessage(),
+                'smtp_config' => [
+                    'host' => env('MAIL_HOST'),
+                    'port' => env('MAIL_PORT'),
+                    'encryption' => env('MAIL_ENCRYPTION'),
+                ]
+            ]);
+
+            throw $e;
 
         } catch (\Exception $e) {
             Log::error('Contact email sending failed', [
@@ -93,6 +135,8 @@ class SendContactEmailJob extends Job implements ShouldQueue
                 'data' => $this->emailData,
                 'error' => $e->getMessage(),
             ]);
+
+            throw $e;
         }
     }
 
