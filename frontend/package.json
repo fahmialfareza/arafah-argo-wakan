@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "build:ssg": "node scripts/ssg.mjs",
     "preview": "vite preview",
-    "preview:ssg": "vite preview --dir dist-ssg",
+    "preview:ssg": "node scripts/preview-ssg.mjs",
     "lint": "eslint ."
   },
   "dependencies": {
