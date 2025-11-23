@@ -92,4 +92,42 @@ return [
   */
   'password' => env('MAIL_PASSWORD'),
 
+  /*
+  |--------------------------------------------------------------------------
+  | SMTP Timeout
+  |--------------------------------------------------------------------------
+  |
+  | The number of seconds to wait before timing out when connecting to the
+  | SMTP server. Increase this if you're experiencing timeout errors.
+  |
+  */
+  'timeout' => env('MAIL_TIMEOUT', 30),
+
+  /*
+  |--------------------------------------------------------------------------
+  | Stream Options
+  |--------------------------------------------------------------------------
+  |
+  | Additional stream context options for SMTP connections.
+  | Useful for SSL/TLS verification and connection settings.
+  |
+  */
+  'stream' => [
+    'ssl' => [
+      'verify_peer' => env('MAIL_VERIFY_PEER', true),
+      'verify_peer_name' => env('MAIL_VERIFY_PEER_NAME', true),
+      'allow_self_signed' => env('MAIL_ALLOW_SELF_SIGNED', false),
+    ],
+  ],
+
+  /*
+  |--------------------------------------------------------------------------
+  | Mail Queue Connection
+  |--------------------------------------------------------------------------
+  |
+  | Queue connection to use for queued mail. Set to null to use default.
+  |
+  */
+  'queue' => env('MAIL_QUEUE_CONNECTION', null),
+
 ];

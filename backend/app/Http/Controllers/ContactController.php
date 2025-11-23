@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendContactEmailJob;
 use App\Mail\ContactFormMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Queue;
 
 class ContactController extends Controller
 {
@@ -35,43 +37,48 @@ class ContactController extends Controller
 
     try {
       // Prepare data for email
-      $name = $request->input('name');
-      $company = $request->input('company');
-      $email = $request->input('email');
-      $phone = $request->input('phone', 'N/A');
-      $message_text = $request->input('message');
-      $products = $request->input('products', []);
+      $emailData = [
+        'name' => $request->input('name'),
+        'company' => $request->input('company'),
+        'email' => $request->input('email'),
+        'phone' => $request->input('phone', 'N/A'),
+        'message' => $request->input('message'),
+        'products' => $request->input('products', []),
+      ];
 
-      // Build HTML email
-      $html = view('emails.contact-form', [
-        'name' => $name,
-        'company' => $company,
-        'email' => $email,
-        'phone' => $phone,
-        'message' => $message_text,
-        'products' => $products,
-      ])->render();
+      // Generate reference ID
+      $referenceId = 'INQ-' . date('YmdHis') . '-' . rand(1000, 9999);
 
-      // Send HTML email to business
-      Mail::html($html, function ($message) use ($name) {
-        $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
-          ->to(env('MAIL_TO_ADDRESS'))
-          ->subject('New Inquiry from ' . $name);
-      });
+      // Queue the email (prevents timeout issues)
+      // Uses database queue by default, falls back to sync if queue not configured
+      try {
+        Queue::push(new SendContactEmailJob($emailData));
+        \Log::info('Contact inquiry queued for email delivery', [
+          'reference_id' => $referenceId,
+          'name' => $emailData['name'],
+          'email' => $emailData['email'],
+          'company' => $emailData['company'],
+        ]);
+      } catch (\Exception $queueException) {
+        // If queueing fails, try sending immediately
+        \Log::warning('Queue failed, attempting immediate send', [
+          'error' => $queueException->getMessage(),
+        ]);
 
-      // Log the inquiry (optional)
-      \Log::info('Contact inquiry received', [
-        'name' => $name,
-        'email' => $email,
-        'company' => $company,
-        'timestamp' => date('Y-m-d H:i:s'),
-      ]);
+        $html = view('emails.contact-form', $emailData)->render();
+
+        Mail::html($html, function ($message) use ($emailData) {
+          $message->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
+            ->to(env('MAIL_TO_ADDRESS'))
+            ->subject('New Inquiry from ' . $emailData['name']);
+        });
+      }
 
       return response()->json([
         'success' => true,
         'message' => 'Inquiry submitted successfully! We will contact you soon.',
         'data' => [
-          'reference_id' => 'INQ-' . date('YmdHis') . '-' . rand(1000, 9999),
+          'reference_id' => $referenceId,
           'submitted_at' => date('c'),
         ]
       ], 200);
