@@ -91,20 +91,24 @@ jobs:
         run: |
           echo "${{ secrets.BACKEND_ENV }}" > .env
 
-      - name: Install composer dependencies
-        working-directory: ./backend
-        run: composer install --no-dev --optimize-autoloader --no-interaction
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass rsync
 
-      - name: Upload backend via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "backend/*"
-          target: ${{ secrets.SSH_BACKEND_DIR }}
-          strip_components: 1
+      - name: Upload backend via rsync
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          rsync -avz --delete \
+            --exclude 'vendor/' \
+            --exclude 'storage/logs/*' \
+            --exclude 'storage/framework/cache/*' \
+            --exclude 'storage/framework/sessions/*' \
+            --exclude 'storage/framework/views/*' \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            -e "sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" \
+            ./backend/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_BACKEND_DIR }}/
 
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1.0.3
@@ -115,6 +119,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ${{ secrets.SSH_BACKEND_DIR }}
+            composer install --no-dev --optimize-autoloader --no-interaction
             php artisan optimize || true
             php artisan config:clear || true
             php artisan cache:clear || true
