@@ -2,8 +2,18 @@ import { useState } from "react";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { useSubmitContactForm } from "../hooks/useSubmitContactForm";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function Contact() {
+  useDocumentMeta({
+    title: "Contact Us - PT Arafah Agro Wakan",
+    description:
+      "Get in touch with our team for inquiries, quotations, and business partnerships.",
+    keywords: "contact, inquiry, quotation, business partnership",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/contact",
+  });
   const [formData, setFormData] = useState({
     name: "",
     company: "",

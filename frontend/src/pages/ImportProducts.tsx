@@ -1,8 +1,18 @@
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Link } from "@tanstack/react-router";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function ImportProducts() {
+  useDocumentMeta({
+    title: "Import Products - PT Arafah Agro Wakan",
+    description:
+      "Discover our curated selection of high-quality food products imported for local market demands.",
+    keywords: "import products, food, commodities, sourcing",
+    image:
+      "https://images.unsplash.com/photo-1611091219153-e3223f009c2b?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/import-products",
+  });
   return (
     <div className="bg-gray-50 text-gray-800">
       <Navigation />

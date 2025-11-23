@@ -36,9 +36,13 @@ jobs:
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
-      - name: Build with pnpm
+      - name: Build with Vite
         working-directory: ./frontend
         run: pnpm build
+
+      - name: Generate Static Site (SSG)
+        working-directory: ./frontend
+        run: pnpm build:ssg
 
       - name: Deploy frontend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -48,7 +52,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
           protocol: ftps
-          local-dir: ./frontend/dist/
+          local-dir: ./frontend/dist-ssg/
           server-dir: ${{ secrets.FTP_FRONTEND_DIR }}
           dangerous-clean-slate: false
 
@@ -60,7 +64,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
           protocol: ftps
-          local-dir: ./frontend/
+          local-dir: ./frontend/public/
           server-dir: ${{ secrets.FTP_FRONTEND_DIR }}
           dangerous-clean-slate: false
           exclude: |

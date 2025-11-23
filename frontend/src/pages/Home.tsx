@@ -1,8 +1,20 @@
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Link } from "@tanstack/react-router";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function Home() {
+  useDocumentMeta({
+    title: "PT Arafah Agro Wakan - Premium Indonesian Commodities",
+    description:
+      "Your trusted partner for high-quality Briquettes, Spices, Coffee, and Agricultural products from Indonesia.",
+    keywords:
+      "Indonesian commodities, briquettes, spices, coffee, export, import",
+    image:
+      "https://images.unsplash.com/photo-1511920183864-4143ba26b6f0?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/",
+  });
+
   return (
     <div className="bg-gray-50 text-gray-800">
       <Navigation />

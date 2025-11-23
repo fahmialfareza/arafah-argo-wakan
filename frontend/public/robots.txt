@@ -1,0 +1,32 @@
+# Robots.txt for PT Arafah Agro Wakan
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /private
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /.git
+
+# Crawl delay (milliseconds)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://arafahagro.com/sitemap.xml
+
+# Specific rules for common bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: AhrefsBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: SemrushBot
+Allow: /
+Crawl-delay: 1

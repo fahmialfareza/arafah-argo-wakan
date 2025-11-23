@@ -1,7 +1,17 @@
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function About() {
+  useDocumentMeta({
+    title: "About Us - PT Arafah Agro Wakan",
+    description:
+      "Learn about our mission, values, and commitment to quality in Indonesian commodity trading.",
+    keywords: "about us, company, mission, values, Indonesian commodities",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/about",
+  });
   return (
     <div className="bg-gray-50 text-gray-800">
       <Navigation />

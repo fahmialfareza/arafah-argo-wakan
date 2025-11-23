@@ -1,7 +1,17 @@
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function Facility() {
+  useDocumentMeta({
+    title: "Our Facility - PT Arafah Agro Wakan",
+    description:
+      "Tour our state-of-the-art facility for processing, grading, and packing export-ready products.",
+    keywords: "facility, warehouse, processing, equipment, infrastructure",
+    image:
+      "https://images.unsplash.com/photo-1588444968576-f76e39065d62?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/facility",
+  });
   return (
     <div className="bg-gray-50 text-gray-800">
       <Navigation />

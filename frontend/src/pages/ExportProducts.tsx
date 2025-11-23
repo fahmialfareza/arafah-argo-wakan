@@ -1,8 +1,18 @@
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Link } from "@tanstack/react-router";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function ExportProducts() {
+  useDocumentMeta({
+    title: "Export Products - PT Arafah Agro Wakan",
+    description:
+      "Explore our premium export products including Briquettes, Spices, Coffee, and Agricultural commodities.",
+    keywords: "export products, briquettes, spices, coffee, commodities",
+    image:
+      "https://images.unsplash.com/photo-1621034424647-1f9b4e53c43f?auto=format&fit=crop&w=1200&q=80",
+    canonical: "https://arafahagro.com/export-products",
+  });
   return (
     <div className="bg-gray-50 text-gray-800">
       <Navigation />
