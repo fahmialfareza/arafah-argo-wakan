@@ -65,10 +65,10 @@ class ContactController extends Controller
           'error' => $transportException->getMessage(),
           'reference_id' => $referenceId,
         ]);
-
+        
         // Return success to user but note email issue in logs
         // The job will retry automatically
-
+        
       } catch (\Exception $queueException) {
         // If queueing fails for other reasons, log the error
         \Log::error('Queue processing failed', [
