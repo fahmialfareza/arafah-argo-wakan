@@ -69,7 +69,7 @@ const routes = Object.keys(routeMetadata);
 /**
  * Generate HTML file with proper meta tags
  */
-function generatePage(route, metadata) {
+function generatePage(route, metadata, assetJS, assetCSS) {
   const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -127,8 +127,8 @@ function generatePage(route, metadata) {
       rel="stylesheet"
     />
     <!-- Vite App Scripts and Styles -->
-    <script type="module" crossorigin src="/assets/index.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index.css">
+    <script type="module" crossorigin src="${assetJS}"></script>
+    <link rel="stylesheet" crossorigin href="${assetCSS}">
   </head>
   <body class="font-poppins">
     <div id="root"></div>
@@ -227,11 +227,32 @@ async function buildSSG() {
       });
     }
 
+    // Step 4.5: Extract asset filenames from Vite build
+    console.log("🔍 Extracting asset filenames from Vite build...");
+    const viteIndexPath = path.join(DIST_DIR, "index.html");
+    const viteIndexContent = await fs.readFile(viteIndexPath, "utf8");
+
+    // Extract JS and CSS asset paths
+    const jsMatch = viteIndexContent.match(/src="(\/assets\/index-[^"]+\.js)"/);
+    const cssMatch = viteIndexContent.match(
+      /href="(\/assets\/index-[^"]+\.css)"/
+    );
+
+    if (!jsMatch || !cssMatch) {
+      console.error("❌ Could not find asset references in Vite build");
+      process.exit(1);
+    }
+
+    const assetJS = jsMatch[1];
+    const assetCSS = cssMatch[1];
+    console.log(`  ✓ Found JS: ${assetJS}`);
+    console.log(`  ✓ Found CSS: ${assetCSS}`);
+
     // Step 5: Generate HTML files with SEO metadata
     console.log("🌐 Generating HTML pages with SEO metadata...");
     for (const route of routes) {
       const metadata = routeMetadata[route];
-      const html = generatePage(route, metadata);
+      const html = generatePage(route, metadata, assetJS, assetCSS);
 
       // Create directory structure
       let filePath;
